@@ -3,26 +3,39 @@
 public class WanderingAI : MonoBehaviour
 {
 	[SerializeField] private GameObject fireballPrefab;
+
+	public const float _baseSpeed = 3.0f;
+
 	private GameObject _fireball;
-	public float speed = 3.0f;
-	public float obstracleRange = 5.0f;
+	public float _speed = 3.0f;
+	public float _obstracleRange = 5.0f;
 	private bool _alive = true;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Awake()
     {
-        
+		Messenger<float>.AddListener(GameEvent.SPEED_CHANGE, OnSpeedChange);
     }
+
+    private void OnDestroy()
+    {
+		Messenger<float>.RemoveListener(GameEvent.SPEED_CHANGE, OnSpeedChange);
+    }
+    private void OnSpeedChange(float value)
+    {
+		Debug.Log(value);
+		_speed = _baseSpeed * value;
+    }
+
 	public void SetAlive(bool value)
 	{
 		_alive = value;
 	}
 
-	// Update is called once per frame
 	void Update()
     {
 		if (_alive)
 		{
-			transform.Translate(0, 0, speed * Time.deltaTime);
+			transform.Translate(0, 0, _speed * Time.deltaTime);
 			Ray ray = new Ray(transform.position, transform.forward);
 			RaycastHit hit;
 			if (Physics.SphereCast(ray, 0.75f, out hit))
@@ -37,9 +50,9 @@ public class WanderingAI : MonoBehaviour
 						_fireball.transform.rotation = transform.rotation;
 					}
 				}
-				else if (hit.distance < obstracleRange)
+				else if (hit.distance < _obstracleRange)
 				{
-					float angle = Random.Range(-110, 110);
+					float angle = UnityEngine.Random.Range(-110, 110);
 					transform.Rotate(0, angle, 0);
 				}
 				
